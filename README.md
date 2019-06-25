@@ -32,7 +32,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+One of the biggest challenges while creating this app was getting used to the keys on a Mac. I also had some trouble with constrained layout and understanding the code. 
 
 ## License
 
