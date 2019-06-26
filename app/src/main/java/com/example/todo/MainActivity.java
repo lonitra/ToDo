@@ -1,5 +1,6 @@
 package com.example.todo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +18,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+
+import static com.example.todo.EditItemActivity.EDIT_REQUEST_CODE;
+import static com.example.todo.EditItemActivity.ITEM_POSITION;
+import static com.example.todo.EditItemActivity.ITEM_TEXT;
 
 public class MainActivity extends AppCompatActivity {
     ArrayList<String> item;
@@ -56,7 +61,21 @@ public class MainActivity extends AppCompatActivity {
                 itemAdapter.notifyDataSetChanged();
                 Log.i("MainActivity","Removed Item " + position);
                 writeItems();
+
                 return true;
+            }
+        });
+        // set the ListView's regular click listener
+        lvItem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // first parameter is the context, second is the class of the activity to launch
+                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
+                // put "extras" into the bundle for access in the edit activity
+                i.putExtra(ITEM_TEXT, item.get(position));
+                i.putExtra(ITEM_POSITION, position);
+                // brings up the edit activity with the expectation of a result
+                startActivityForResult(i, EDIT_REQUEST_CODE);
             }
         });
     }
@@ -87,6 +106,26 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             // print the error to the console
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // EDIT_REQUEST_CODE defined with constants
+        if (resultCode == RESULT_OK && requestCode == EDIT_REQUEST_CODE) {
+            // extract updated item value from result extras
+            String updatedItem = data.getExtras().getString(ITEM_TEXT);
+            // get the position of the item which was edited
+            int position = data.getExtras().getInt(ITEM_POSITION, 0);
+            // update the model with the new item text at the edited position
+            item.set(position, updatedItem);
+            // notify the adapter the model changed
+            itemAdapter.notifyDataSetChanged();
+            // Store the updated items back to disk
+            writeItems();
+            // notify the user the operation completed OK
+            Toast.makeText(this, "Item updated", Toast.LENGTH_SHORT).show();
         }
     }
 }
